@@ -260,8 +260,8 @@ libraries just because they are common in production.
 | 7  | Generic workflow engine: states / transitions / actions | **Complete** |
 | 8  | Employee Management | **Complete** |
 | 9  | Leave Management System | **Complete** |
-| 10 | Attendance & Timesheet | Not started |
-| 11 | Expense Management | Not started |
+| 10 | Attendance & Timesheet | **Complete** |
+| 11 | Expense Management | **Complete** |
 | 12 | Payroll + richer ECharts dashboards | Not started |
 | 13 | External connectors: PostgreSQL, REST API, FTP/SFTP | Not started |
 | 14 | Azure Data Factory + ADLS, Bronze/Silver/Gold | Not started |
@@ -320,6 +320,42 @@ libraries just because they are common in production.
   while its state `is_initial`, and a transition leaving the initial state
   belongs to the request's owner (which is also what forbids self-approval).
   261 backend tests passing.
+
+- **Stage 10 complete** - Attendance & Timesheet. `attendance` is one row per
+  employee per day (unique constraint, not a service check) whose
+  `worked_minutes` is derived from the two timestamps but stored, and
+  recalculated by one function after every write so it cannot drift.
+  `timesheets` is a separate table driven by the seeded `TIMESHEET_APPROVAL`
+  workflow - the first with a loop, `REJECTED -> DRAFT`. **The engine was not
+  modified.**
+  Two pieces of shared infrastructure came out of this stage:
+  `app/services/employee_scope.py` now holds the "own records, plus your team
+  if you hold APPROVE" rule for Leave, Attendance and Timesheets alike; and
+  `workflow_states.is_owner_held` marks the states where a record sits with
+  the person who raised it, which is how an application tells an owner's
+  action from an approver's without naming a transition. Stage 9's
+  `is_initial` heuristic could not express Revise, and now reads the same
+  flag. 357 backend tests passing.
+
+- **Stage 11 complete** - Expense Management. `expense_categories` as
+  configuration rows, `expenses` driven by the seeded `EXPENSE_APPROVAL`
+  workflow, and `expense_attachments` holding receipt metadata while the bytes
+  sit on git-ignored local disk. **The engine was not modified.**
+  Two permanent rules came out of this stage and are worth keeping:
+  **Money is `Numeric`, never `Float`.** A binary float cannot represent 0.10
+  exactly, so sums drift; and rounding is explicit `ROUND_HALF_UP`, because
+  Decimal's default is banker's rounding, which is right for statistics and
+  wrong for money. Any future amount column - payroll especially - follows
+  this.
+  **An uploaded file never names itself.** `file_name` is the browser's string
+  and is only ever displayed; `stored_name` is generated server-side and is the
+  only thing used to build a path. Type is an allow-list, size is capped, and
+  downloads go by id with the usual scope check.
+  Also: `workflow_transitions.actor` now carries "whose action is this?"
+  (OWNER / OTHER / ANY), replacing the state-level inference used in Stages 9
+  and 10, which could not express an owner action leaving a state held by
+  somebody else. `app/workflows/ownership.py` is the single reader of it, used
+  by Leave, Timesheets and Expenses alike. 440 backend tests passing.
 
 ## Working rule for every new stage
 

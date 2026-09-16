@@ -296,7 +296,11 @@ def test_the_expected_screens_exist(seeded: Session) -> None:
         "LEAVE_MANAGEMENT": {"LEAVE_DASHBOARD", "MY_LEAVE", "LEAVE_REQUESTS",
                              "LEAVE_APPROVAL"},
         "PAYROLL": {"PAYROLL_DASHBOARD", "MY_SALARY", "SALARY_COMPONENTS"},
-        "ATTENDANCE_TIMESHEET": {"ATTENDANCE_DASHBOARD", "MY_ATTENDANCE", "TIMESHEET"},
+        # Stage 10 added the two management screens, alongside the
+        # self-service pair an employee sees.
+        "ATTENDANCE_TIMESHEET": {"ATTENDANCE_DASHBOARD", "MY_ATTENDANCE",
+                                 "TIMESHEET", "TEAM_ATTENDANCE",
+                                 "TIMESHEET_APPROVAL"},
         "EXPENSE_MANAGEMENT": {"EXPENSE_DASHBOARD", "MY_EXPENSES", "EXPENSE_APPROVAL"},
         "USER_MANAGEMENT": {"USER_LIST"},
         "ROLE_MANAGEMENT": {"ROLE_LIST"},

@@ -10,6 +10,10 @@ psycopg[binary]==3.2.10     # PostgreSQL driver used by SQLAlchemy
 pydantic-settings==2.11.0   # loads settings (e.g. DATABASE_URL) from .env
 
 bcrypt==5.0.0               # password hashing (stage 3 authentication)
+python-multipart==0.0.20    # lets FastAPI parse multipart/form-data, which is
+                            # how a browser uploads a file. Required by Stage 11
+                            # receipt upload; FastAPI refuses to define an
+                            # UploadFile route without it.
 
 # --- development / test only ---
 pytest==8.4.2               # test runner

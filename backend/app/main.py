@@ -1,10 +1,11 @@
 """
 Employee Platform Demo - FastAPI application entry point.
 
-Stage 9: authentication, metadata-driven RBAC, the business-unit hierarchy,
+Stage 11: authentication, metadata-driven RBAC, the business-unit hierarchy,
 metadata-driven applications/screens/dashboards, a generic workflow engine,
-Employee Management, and the Leave Management System - the first business
-process driven end to end by that engine.
+Employee Management, Leave, Attendance & Timesheet, and Expense Management -
+the third application driven by that one engine, with receipts stored on local
+disk.
 
 Run locally from the "backend" directory:
     uvicorn app.main:app --reload
@@ -15,20 +16,23 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.api import (
     access,
+    attendance,
     auth,
     business_units,
     employees,
+    expenses,
     health,
     leave,
     rbac,
+    timesheets,
     workflows,
 )
 from app.core.config import settings
 
 app = FastAPI(
     title="Employee Platform Demo API",
-    description="Metadata-driven enterprise platform - Leave Management System.",
-    version="0.9.0",
+    description="Metadata-driven enterprise platform - Expense Management.",
+    version="0.11.0",
 )
 
 # Browsers block a page on http://localhost:5173 from reading a response from
@@ -51,6 +55,9 @@ app.include_router(business_units.router)
 app.include_router(workflows.router)
 app.include_router(employees.router)
 app.include_router(leave.router)
+app.include_router(attendance.router)
+app.include_router(timesheets.router)
+app.include_router(expenses.router)
 
 
 @app.get("/", tags=["system"])

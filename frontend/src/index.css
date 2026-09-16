@@ -1041,6 +1041,118 @@ button:disabled {
   line-height: 1.2;
 }
 
+/* The header of the "today" panel: a date on the left, a status badge on the
+   right, wrapping onto two lines rather than colliding when narrow. */
+.today__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+
+.today__header h2 {
+  margin: 0;
+}
+
+/* A checkbox or a date field sitting inside the toolbar, beside the selects.
+   The label wraps the control so clicking the text focuses it. */
+.toolbar__check,
+.toolbar__field {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.toolbar__check input[type='checkbox'] {
+  width: auto;
+  height: auto;
+  margin: 0;
+}
+
+.toolbar__field input {
+  width: auto;
+}
+
+/* A column of money. Right-aligned and tabular so decimal points line up and
+   a column of figures can be scanned downward rather than read across. */
+.cell--number {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* The receipts attached to a claim. */
+.attachment-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.attachment {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-surface-alt);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+}
+
+/* The first child takes the slack, so the size and the Remove button sit
+   together at the right rather than drifting apart. */
+.attachment > :first-child {
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+}
+
+/* Rejecting asks for a reason first. The box replaces the action buttons
+   rather than appearing beside them, so there is one obvious thing to do. */
+.reason-box {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  background: var(--color-surface-alt);
+  border: 1px solid var(--color-border);
+  border-left: 3px solid var(--color-error);
+  border-radius: var(--radius-sm);
+  margin-top: var(--space-2);
+}
+
+.reason-box label {
+  margin-top: 0;
+}
+
+/* A file picker is a control the browser draws itself, so it only needs to
+   sit on the grid like the others rather than be restyled. */
+input[type='file'] {
+  height: auto;
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-surface-alt);
+}
+
+/* A table cell holding free text that could be any length. It takes the
+   leftover width and truncates with an ellipsis instead of stretching the
+   table past its container; the full text stays in the title attribute and in
+   the detail panel. */
+.cell--clip {
+  max-width: 22rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* A compact row of headline figures, for a screen that is not a dashboard.
    Deliberately NOT the widget grid: those tiles are metadata-driven and come
    from the dashboard tables, whereas these four belong to one screen and would

@@ -6,6 +6,20 @@ from sqlalchemy import Boolean, ForeignKey, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base, TimestampMixin
+
+# Who performs a transition, relative to the record it acts on.
+#
+#   OWNER  only the person the record belongs to
+#   OTHER  anyone EXCEPT that person - which is what forbids self-approval
+#   ANY    no relationship is required
+#
+# The engine does not read this. It answers "which *roles* may perform this
+# transition?"; an application usually also needs "and is this caller the
+# right *person*?", and that is what these say. ANY is the default, so a
+# workflow that does not care - the Stage 7 demo, for one - behaves exactly
+# as it always has.
+TRANSITION_ACTORS = ("OWNER", "OTHER", "ANY")
+DEFAULT_TRANSITION_ACTOR = "ANY"
 from app.models.associations import workflow_transition_roles
 
 if TYPE_CHECKING:
@@ -51,6 +65,17 @@ class WorkflowTransition(Base, TimestampMixin):
         ForeignKey("workflow_states.id", ondelete="RESTRICT"),
         nullable=False,
         index=True,
+    )
+
+    # Marked on the transition rather than on its from-state, because the
+    # two can disagree. An expense sitting in SUBMITTED is on the approver's
+    # desk, yet Cancel - the claimant withdrawing it - is still the owner's
+    # action out of that same state. A state-level flag cannot express that;
+    # this can.
+    actor: Mapped[str] = mapped_column(
+        String(10), nullable=False,
+        default=DEFAULT_TRANSITION_ACTOR,
+        server_default=DEFAULT_TRANSITION_ACTOR,
     )
 
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False,

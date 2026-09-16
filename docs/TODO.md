@@ -168,8 +168,98 @@ verified**, not merely written.
   query themselves, so the scope rule cannot be skipped by any caller.
   *Note:* the React screens are verified by build and by the API they consume;
   there is still no frontend test framework, so no automated browser test.
-- [ ] **Stage 10 - Attendance & Timesheet**
-- [ ] **Stage 11 - Expense Management**
+- [x] **Stage 10 - Attendance & Timesheet**
+  Two new tables (migration `38b012a1140b`) and one column added to an
+  existing one. `attendance` is one row per employee per day, with a unique
+  constraint doing the work rather than a check in the service, and a
+  `worked_minutes` that is derived from the two timestamps but stored - the
+  duplication is deliberate, and a test proves the stored value always matches
+  the times it came from. `timesheets` is kept separate on purpose: the two
+  disagreeing is useful information, and merging them would make "present, but
+  nothing logged" impossible to express.
+  The seeded `TIMESHEET_APPROVAL` workflow is the first with a **loop**:
+  `REJECTED -> DRAFT` (Revise) returns a rejected entry to its author.
+  `attendance_service` holds the clock rules; `timesheet_service` delegates
+  every state change to the Stage 7 engine. `/api/attendance/*` and
+  `/api/timesheets/*`; fifteen widgets across two dashboards on the existing
+  Attendance Dashboard screen, all live and scoped; four React screens
+  registered through the existing screen registry.
+  **The engine was not modified.** A `Timesheet` satisfies its four-field
+  contract and is driven by rows.
+  *Shared rather than copied:* the visibility rule used by Leave, Attendance
+  and Timesheets - your own records always, plus your team's if you hold
+  APPROVE - was extracted into `app/services/employee_scope.py` and all three
+  now call it. Writing it three times would have been three chances to drift.
+  *One metadata change, and why:* `workflow_states.is_owner_held`. Stage 9
+  inferred "is this the owner's action?" from `is_initial`, which is true only
+  while every owner action leaves the first state. Revise breaks that - it is
+  the author's action starting from Rejected - so inferring from `is_initial`
+  would have handed Revise to the approver. Marking the *state* says it
+  directly and generalises; Leave now reads the same flag, and the column
+  defaults to false so nothing else changed.
+  *Verified:* 357 backend tests pass (96 new, 261 pre-existing, one Stage 6
+  metadata expectation updated for the two added screens); `alembic check`
+  clean; `npm run build` clean; the seed is idempotent - a second run reports
+  zero changes across 417 attendance rows, 231 timesheets and 587 history
+  entries. Live over HTTP: an employee checks in, is refused a duplicate
+  check-in, checks out, is refused a duplicate check-out; a manager's
+  "missing checkout" filter returns 13 open days across his branch; a
+  timesheet goes Draft to Submitted to Rejected to Draft to Submitted to
+  Approved, with the author offered Revise and **the manager who rejected it
+  offered nothing**, and all six steps in the history with the right names
+  against them. A Company 2 record is 403 for the manager, for HR and for the
+  employee alike. A manager is refused the correction endpoint because
+  MANAGER has no EDIT permission - no role name involved. Scope staircase
+  418/292/125/21 for admin/priya/raj/jane.
+  *Note:* the React screens are verified by build and by the API they consume;
+  there is still no frontend test framework, so no automated browser test.
+- [x] **Stage 11 - Expense Management**
+  Three new tables (migration `aab477092eec`) and one column added to an
+  existing one. `expense_categories` is configuration, so adding a category is
+  an INSERT and the React dropdown is built from the API. `expenses` carries
+  `workflow_id` / `current_state_id` rather than a status column, and its
+  `amount` is **Numeric(12, 2), never Float** - a binary float cannot hold
+  0.10 exactly, and money that does not reconcile is worse than no money.
+  `expense_attachments` stores receipt metadata; the bytes live on local disk
+  under a git-ignored directory.
+  `expense_service` holds the claim rules and the storage rules;
+  `/api/expenses/*` covers claims, the workflow, and receipt upload,
+  download and removal; eight widgets on the existing Expense Dashboard now
+  draw live scoped figures; two React screens are registered through the
+  existing screen registry.
+  **The engine was not modified.** An `Expense` satisfies its four-field
+  contract and is driven by rows.
+  *One metadata change, and why it was needed a third time:*
+  `workflow_transitions.actor` (OWNER / OTHER / ANY, default ANY). Stage 9
+  inferred "is this the owner's action?" from `is_initial`; Stage 10 moved it
+  to the from-state's `is_owner_held`. Expense breaks both, because Cancel
+  leaves SUBMITTED - a state that genuinely sits on the approver's desk, which
+  is what the pending queue counts - and still belongs to the claimant. No
+  state-level flag can say both things at once, so the marker moved onto the
+  transition where it always belonged. `is_owner_held` stays, because "whose
+  desk is this on?" is a separate and still-useful question.
+  *Shared rather than copied:* the three private `_is_owner_action` helpers in
+  Leave, Timesheets and Expenses collapsed into `app/workflows/ownership.py`.
+  *Receipt security:* an attachment keeps two names. `file_name` is what the
+  person called it and is only displayed; `stored_name` is generated
+  server-side and is the only thing used to build a path. A test uploads a
+  file called `../../../../etc/passwd` and checks that nothing resembling it
+  reaches the filesystem. Type is an allow-list of three, size is capped at
+  5 MB, and downloads are addressed by attachment id with the usual scope
+  check through the parent claim.
+  *Verified:* 440 backend tests pass (83 new); `alembic check`
+  clean; `npm run build` clean; the seed is idempotent - a second run reports
+  zero changes across 8 categories, 94 claims and 247 history entries. Live
+  over HTTP: an employee sees only My Expenses, creates a claim, edits it,
+  attaches a PNG receipt and is refused an `.exe`; the claim goes Draft to
+  Submitted to Rejected to Draft to Submitted to Approved, with the rejection
+  reason preserved on the history row; while Submitted, **the claimant is
+  offered Cancel and the manager Approve/Reject, at the same moment on the
+  same record**; a manager downloads the receipt of a claim in his scope, and
+  a Company 2 claim is 403 for the manager, for HR and for the employee alike.
+  Scope staircase 95/68/30/6 for admin/priya/raj/jane.
+  *Note:* the React screens are verified by build and by the API they consume;
+  there is still no frontend test framework, so no automated browser test.
 - [ ] **Stage 12 - Payroll + richer ECharts dashboards**
 - [ ] **Stage 13 - External connectors (PostgreSQL, REST API, FTP/SFTP)**
 - [ ] **Stage 14 - Azure Data Factory + ADLS, Bronze/Silver/Gold**

@@ -33,7 +33,7 @@ from app.models.leave_type import LeaveType
 from app.models.user import User
 from app.models.workflow_state import WorkflowState
 from app.services import business_unit_service, rbac_service
-from app.workflows import engine
+from app.workflows import engine, ownership
 from app.workflows.exceptions import TransitionNotAuthorized
 
 LEAVE_WORKFLOW_CODE = "LEAVE_APPROVAL"
@@ -45,7 +45,7 @@ APPROVER_PERMISSION = "APPROVE"
 # for "this final state means yes" versus "this one means no". The dashboard
 # needs that distinction for its Approved and Rejected tiles, so the codes are
 # named here and nowhere else. Every other rule below is derived from the
-# metadata itself - see _is_owner_action.
+# metadata itself, and who may act comes from app/workflows/ownership.py.
 APPROVED_STATE_CODE = "APPROVED"
 REJECTED_STATE_CODE = "REJECTED"
 
@@ -298,27 +298,6 @@ def update_request(db: Session, user: User, request_id: int, changes: dict) -> L
 # ---------------------------------------------------------------------------
 
 
-def _is_owner_action(transition) -> bool:
-    """
-    Is this an action for the person who raised the request, or for someone
-    else deciding on it?
-
-    The rule is read off the metadata rather than written down as a list of
-    transition codes: **a transition that leaves the workflow's initial state
-    belongs to the owner; any later transition belongs to someone else.**
-
-    For LEAVE_APPROVAL that resolves exactly as intended - Submit and Cancel
-    both leave Draft, so they are the employee's; Approve and Reject leave
-    Pending Approval, so they are the approver's. Add a transition to the
-    metadata tomorrow and it is classified without touching this file.
-
-    It is also what prevents self-approval: an owner is never offered an
-    action that starts after the initial state, even if their role would
-    otherwise allow it. A manager cannot approve their own leave.
-    """
-    return transition.from_state.is_initial
-
-
 def available_transitions(db: Session, user: User, request_id: int):
     """
     The engine's answer, narrowed by ownership.
@@ -326,7 +305,8 @@ def available_transitions(db: Session, user: User, request_id: int):
     The engine knows which *roles* may perform a transition. It deliberately
     does not know the caller's relationship to the record - that is
     application knowledge, and this is the application. So the metadata answer
-    comes first, and ownership filters it.
+    comes first, and `app/workflows/ownership.py` filters it using the actor
+    marked on each transition.
 
     Resolving the record here rather than accepting one means a caller can
     never be offered actions on a request outside their business-unit scope.
@@ -335,11 +315,14 @@ def available_transitions(db: Session, user: User, request_id: int):
     own = get_own_employee(db, user)
     is_owner = own is not None and own.id == request.employee_id
 
-    return [
-        transition
-        for transition in engine.get_available_transitions(db, request, user)
-        if _is_owner_action(transition) == is_owner
-    ]
+    # The metadata says which transitions are the owner's and which are an
+    # approver's; `ownership` applies that, for every workflow-driven
+    # application alike. Submit and Cancel are marked OWNER on the
+    # LEAVE_APPROVAL transitions, Approve and Reject are marked OTHER, and
+    # that second marking is what forbids approving your own leave.
+    return ownership.filter_for_caller(
+        engine.get_available_transitions(db, request, user), is_owner=is_owner
+    )
 
 
 def execute_transition(

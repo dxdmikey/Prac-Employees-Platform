@@ -15,6 +15,9 @@ import { API_BASE_URL } from '../config/api.js'
 // bug that stalled the login page, so every request is bounded.
 const REQUEST_TIMEOUT_MS = 10000
 
+// Uploads share the timeout above. At the 5 MB receipt cap over a loopback
+// connection that is ample; a real network would want its own, longer budget.
+
 const TOKEN_KEY = 'employee-platform-token'
 
 export function getToken() {
@@ -57,11 +60,24 @@ async function readErrorMessage(response, fallback) {
  * Make a request to the backend.
  *
  * @param {string} path      e.g. "/api/access/me"
- * @param {object} options   method, body (a plain object), auth (default true)
+ * @param {object} options   method, body, auth (default true), raw (default false)
+ *
+ * `body` is normally a plain object and is sent as JSON. Pass a FormData
+ * instead and it is sent as multipart - which is how a file upload works, and
+ * why the Content-Type header is left off in that case: the browser has to set
+ * it itself, because only it knows the boundary string separating the parts.
+ *
+ * `raw: true` returns the Response untouched instead of parsing JSON, for
+ * endpoints that hand back a file rather than a record.
  */
-export async function apiRequest(path, { method = 'GET', body, auth = true } = {}) {
+export async function apiRequest(
+  path,
+  { method = 'GET', body, auth = true, raw = false } = {},
+) {
+  const isFormData = typeof FormData !== 'undefined' && body instanceof FormData
+
   const headers = {}
-  if (body !== undefined) headers['Content-Type'] = 'application/json'
+  if (body !== undefined && !isFormData) headers['Content-Type'] = 'application/json'
 
   if (auth) {
     const token = getToken()
@@ -74,7 +90,8 @@ export async function apiRequest(path, { method = 'GET', body, auth = true } = {
     response = await fetch(`${API_BASE_URL}${path}`, {
       method,
       headers,
-      body: body === undefined ? undefined : JSON.stringify(body),
+      body:
+        body === undefined ? undefined : isFormData ? body : JSON.stringify(body),
       signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     })
   } catch (err) {
@@ -102,5 +119,7 @@ export async function apiRequest(path, { method = 'GET', body, auth = true } = {
 
   // 204 No Content has no body to parse.
   if (response.status === 204) return null
+  // A file download is handed back whole, for the caller to read as a blob.
+  if (raw) return response
   return response.json()
 }

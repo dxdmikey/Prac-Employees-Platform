@@ -35,3 +35,9 @@ Thumbs.db
 *.log
 *.sqlite3
 /data/
+
+# ---------- Uploaded files ----------
+# Expense receipts are written to disk by the running application. They are
+# demo data belonging to one developer's database, not source, and some are
+# real scans in a real deployment - neither belongs in a repository.
+backend/uploads/

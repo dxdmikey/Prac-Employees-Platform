@@ -1,9 +1,15 @@
 import DashboardView from './DashboardView.jsx'
 import EmployeeListScreen from '../screens/EmployeeListScreen.jsx'
 import EmployeeProfileScreen from '../screens/EmployeeProfileScreen.jsx'
+import ExpenseApprovalScreen from '../screens/ExpenseApprovalScreen.jsx'
 import LeaveApprovalScreen from '../screens/LeaveApprovalScreen.jsx'
 import LeaveRequestsScreen from '../screens/LeaveRequestsScreen.jsx'
+import MyAttendanceScreen from '../screens/MyAttendanceScreen.jsx'
+import MyExpensesScreen from '../screens/MyExpensesScreen.jsx'
 import MyLeaveScreen from '../screens/MyLeaveScreen.jsx'
+import TeamAttendanceScreen from '../screens/TeamAttendanceScreen.jsx'
+import TimesheetApprovalScreen from '../screens/TimesheetApprovalScreen.jsx'
+import TimesheetScreen from '../screens/TimesheetScreen.jsx'
 import { Empty, ErrorMessage, Loading } from './StatusViews.jsx'
 import { useAsync } from '../hooks/useAsync.js'
 import { fetchScreenDashboards } from '../services/accessService.js'
@@ -20,10 +26,18 @@ const SCREEN_COMPONENTS = {
   MY_LEAVE: MyLeaveScreen,
   LEAVE_REQUESTS: LeaveRequestsScreen,
   LEAVE_APPROVAL: LeaveApprovalScreen,
-  // LEAVE_DASHBOARD is deliberately absent. It has dashboards configured
-  // against it in metadata, so MetadataScreen below already renders it from
-  // the database - a leave dashboard page would be the hardcoding this whole
-  // design exists to avoid.
+  MY_ATTENDANCE: MyAttendanceScreen,
+  TEAM_ATTENDANCE: TeamAttendanceScreen,
+  TIMESHEET: TimesheetScreen,
+  TIMESHEET_APPROVAL: TimesheetApprovalScreen,
+  MY_EXPENSES: MyExpensesScreen,
+  EXPENSE_APPROVAL: ExpenseApprovalScreen,
+  // LEAVE_DASHBOARD, ATTENDANCE_DASHBOARD and EXPENSE_DASHBOARD are
+  // deliberately absent. It has dashboards configured
+  // All three have dashboards configured against them in metadata, so
+  // MetadataScreen below already renders them from the database - a
+  // hand-written dashboard page would be the hardcoding this whole design
+  // exists to avoid.
 }
 
 // One screen inside an application.

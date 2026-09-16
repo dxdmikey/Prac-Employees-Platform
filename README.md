@@ -7,18 +7,19 @@ a production system.
 1. Employee Management *(built)*
 2. Leave Management System *(built)*
 3. Payroll *(screens only)*
-4. Attendance & Timesheet *(screens only)*
-5. Expense Management *(screens only)*
+4. Attendance & Timesheet *(built)*
+5. Expense Management *(built)*
 6. User Management *(platform admin)*
 7. Role Management *(platform admin)*
 8. User-Role Management *(platform admin)*
 
-> **Current status: Stages 1-9 complete.** Authentication, metadata-driven
+> **Current status: Stages 1-11 complete.** Authentication, metadata-driven
 > RBAC, the business-unit hierarchy with scoped access, metadata-driven
 > applications/screens/dashboards with ECharts, a generic workflow engine,
-> Employee Management, and the Leave Management System are implemented and
-> tested. Leave is the first business process driven end to end by the
-> workflow engine - it added two tables and no engine changes. The remaining
+> Employee Management, Leave, Attendance & Timesheet and Expense Management
+> are implemented and tested. Leave, Timesheets and Expenses are all driven
+> end to end by the one workflow engine, which has not been modified since it
+> was written - a new process is rows, not code. The remaining
 > business applications, external connectors and the Azure ETL are not built
 > yet. See `docs/TODO.md` for the roadmap and `CLAUDE.md` for the
 > architecture rules.
@@ -77,6 +78,11 @@ Hiding something in React is never the control; every API re-checks.
 | Generic workflow engine: states, transitions, RBAC-authorised, append-only history | `app/workflows/engine.py` |
 | Employee Management: scoped, paginated CRUD; live dashboard | `app/services/employee_service.py`, `frontend/src/screens/` |
 | Leave Management: leave types as rows, requests driven by the `LEAVE_APPROVAL` workflow, scoped approval queue, live dashboard | `app/services/leave_service.py`, `frontend/src/screens/` |
+| Attendance: check in / check out, derived worked time, team view, authorised corrections | `app/services/attendance_service.py` |
+| Timesheets: recorded work driven by the `TIMESHEET_APPROVAL` workflow, including a rejected entry returning to its author to revise | `app/services/timesheet_service.py` |
+| The shared "own records, plus your team if you may approve" rule, used by every self-service application | `app/services/employee_scope.py` |
+| Expenses: categories as rows, claims driven by the `EXPENSE_APPROVAL` workflow, exact decimal money, receipts on local disk | `app/services/expense_service.py` |
+| Whether a workflow action belongs to a record's owner or to somebody else | `app/workflows/ownership.py` |
 
 ## Prerequisites
 
@@ -144,7 +150,7 @@ can be seen working:
 | admin | SUPER_ADMIN | Headquarters | 8 applications, all 22 employees, all 25 leave requests |
 | priya | HR | Company 1 | 5 applications, 15 employees, 21 leave requests |
 | raj | MANAGER | Branch 1 | 5 applications, 7 employees, 13 leave requests |
-| jane | EMPLOYEE | Department 1 | 4 applications, no Employee Management, and only her **own** 3 leave requests |
+| jane | EMPLOYEE | Department 1 | 4 applications, no Employee Management, and only her **own** leave, attendance and timesheets |
 
 The last row is the one worth looking at. jane sits in Department 1, which has
 seven seeded leave requests, and she sees three of them - her own. Business-unit

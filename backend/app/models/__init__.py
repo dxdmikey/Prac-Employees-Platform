@@ -12,6 +12,7 @@ Add every new model to this file.
 """
 
 from app.models.application import Application
+from app.models.attendance import Attendance
 from app.models.auth_token import AuthToken
 from app.models.associations import (
     role_applications,
@@ -26,11 +27,15 @@ from app.models.business_unit_type import BusinessUnitType
 from app.models.dashboard import Dashboard
 from app.models.dashboard_widget import DashboardWidget
 from app.models.employee import Employee
+from app.models.expense import Expense
+from app.models.expense_attachment import ExpenseAttachment
+from app.models.expense_category import ExpenseCategory
 from app.models.leave_request import LeaveRequest
 from app.models.leave_type import LeaveType
 from app.models.permission import Permission
 from app.models.role import Role
 from app.models.screen import Screen
+from app.models.timesheet import Timesheet
 from app.models.user import User
 from app.models.workflow import Workflow
 from app.models.workflow_demo_request import WorkflowDemoRequest
@@ -40,17 +45,22 @@ from app.models.workflow_transition import WorkflowTransition
 
 __all__ = [
     "Application",
+    "Attendance",
     "AuthToken",
     "BusinessUnit",
     "BusinessUnitType",
     "Dashboard",
     "DashboardWidget",
     "Employee",
+    "Expense",
+    "ExpenseAttachment",
+    "ExpenseCategory",
     "LeaveRequest",
     "LeaveType",
     "Permission",
     "Role",
     "Screen",
+    "Timesheet",
     "User",
     "Workflow",
     "WorkflowDemoRequest",
