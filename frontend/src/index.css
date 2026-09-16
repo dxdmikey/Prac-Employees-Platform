@@ -1,0 +1,1393 @@
+/* ===========================================================================
+   Employee Platform - design tokens and shared styles.
+
+   Every colour, radius and spacing value in the application is defined once,
+   here, as a CSS custom property (a "design token"). Components use the token
+   names, never raw hex codes, so the whole platform can be re-themed by
+   editing this block alone.
+
+   Contrast was measured, not guessed. Two results shaped the design:
+
+     Teal on white       2.16:1   FAILS - never use teal for text on a light
+                                  surface, and never white text on teal
+     Prussian on teal    8.52:1   passes AAA - so buttons are dark-on-teal
+
+   Teal is therefore an *accent*: button fills, active indicators, and text on
+   dark navy only.
+   =========================================================================== */
+
+:root {
+  /* --- brand palette ---------------------------------------------------- */
+  --color-prussian: #0b132b;   /* darkest navy - sidebar, headings, body text */
+  --color-indigo: #1c2541;     /* raised surfaces on dark, active nav row     */
+  --color-dusk: #3a506b;       /* muted text, secondary buttons               */
+  --color-teal: #5bc0be;       /* the accent                                  */
+  --color-white: #ffffff;
+
+  /* --- neutrals (surfaces, borders, dividers) --------------------------- */
+  --color-neutral-50: #f5f7fa;
+  --color-neutral-100: #e8edf2;
+  --color-neutral-300: #cbd5e1;
+
+  /* --- semantic roles: what the colours are *for* ----------------------- */
+  --color-primary: var(--color-teal);
+  --color-primary-hover: #4aacaa;      /* teal, slightly darkened for hover   */
+  --color-on-primary: var(--color-prussian);  /* 8.52:1 on teal               */
+  --color-secondary: var(--color-dusk);
+  --color-accent: var(--color-teal);
+
+  --color-bg: var(--color-neutral-50);
+  --color-surface: var(--color-white);
+  --color-surface-alt: var(--color-neutral-50);
+  --color-border: var(--color-neutral-100);
+  --color-border-strong: var(--color-neutral-300);
+
+  --color-text: var(--color-prussian);        /* 18.38:1 on white            */
+  --color-text-muted: var(--color-dusk);      /*  8.27:1 on white            */
+  --color-text-on-dark: var(--color-white);
+  --color-text-on-dark-muted: var(--color-neutral-300);
+
+  /* Semantic states. Each measured at 5:1 or better on white. */
+  --color-error: #b3261e;             /* 6.54:1 */
+  --color-error-hover: #8f1e18;
+  --color-error-bg: #fdecec;
+  --color-error-border: #f3c4c1;
+  --color-success: #0f766e;           /* 5.47:1 */
+  --color-success-bg: #e6f4f3;
+  --color-warning: #b45309;           /* 5.02:1 */
+  --color-warning-bg: #fdf3e7;
+
+  /* --- shape and spacing ------------------------------------------------ */
+  --radius-sm: 6px;
+  --radius: 8px;
+  --radius-lg: 12px;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+
+  /* Restrained shadows - depth, not drama. */
+  --shadow-sm: 0 1px 2px rgba(11, 19, 43, 0.06);
+  --shadow: 0 2px 8px rgba(11, 19, 43, 0.08);
+  --shadow-lg: 0 8px 28px rgba(11, 19, 43, 0.14);
+
+  --sidebar-width: 232px;
+  --focus-ring: 0 0 0 3px rgba(91, 192, 190, 0.45);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--color-text);
+  background-color: var(--color-bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1 {
+  font-size: 22px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  margin: 0 0 var(--space-1);
+}
+
+h2 {
+  font-size: 16px;
+  font-weight: 650;
+  margin: 0 0 var(--space-2);
+}
+
+.muted {
+  color: var(--color-text-muted);
+}
+
+.small {
+  font-size: 13px;
+}
+
+/* Every focusable element gets the same visible ring - this is what makes
+   the app usable with a keyboard. */
+:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+  border-radius: var(--radius-sm);
+}
+
+/* ===========================================================================
+   Centred page - used by login and full-page loading/error states
+   =========================================================================== */
+
+.page {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: var(--space-6) var(--space-4);
+}
+
+.page--narrow {
+  max-width: 400px;
+}
+
+/* The login screen sits on the dark brand colour. */
+.page--auth {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 100vh;
+  max-width: 400px;
+  margin: 0 auto;
+  padding: var(--space-5) var(--space-4);
+}
+
+body:has(.page--auth) {
+  background: linear-gradient(
+    160deg,
+    var(--color-prussian) 0%,
+    var(--color-indigo) 100%
+  );
+}
+
+.brand-mark {
+  text-align: center;
+  margin-bottom: var(--space-5);
+  color: var(--color-white);
+}
+
+.brand-mark__name {
+  font-size: 19px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+.brand-mark__tagline {
+  font-size: 13px;
+  color: var(--color-text-on-dark-muted);
+}
+
+.subtitle {
+  color: var(--color-text-muted);
+  margin: 0 0 var(--space-4);
+}
+
+/* ===========================================================================
+   Application shell - dark sidebar, light content
+   =========================================================================== */
+
+.shell {
+  display: flex;
+  min-height: 100vh;
+}
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 var(--sidebar-width);
+  width: var(--sidebar-width);
+  background: var(--color-prussian);
+  color: var(--color-text-on-dark);
+}
+
+.sidebar__brand {
+  padding: var(--space-5) var(--space-4) var(--space-4);
+  font-size: 16px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.sidebar__brand span {
+  display: block;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--color-text-on-dark-muted);
+}
+
+.sidebar__nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--space-3) var(--space-2);
+  flex: 1;
+}
+
+.sidebar__section {
+  padding: var(--space-3) var(--space-2) var(--space-1);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-on-dark-muted);
+}
+
+.nav-link {
+  display: block;
+  width: 100%;
+  padding: 9px var(--space-3);
+  border: none;
+  border-left: 3px solid transparent;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text-on-dark-muted);   /* 12.38:1 on the sidebar */
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.nav-link:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--color-white);
+}
+
+/* Active state: teal is legible on this dark background (7:1), and the left
+   bar carries the meaning for anyone who cannot distinguish the colour. */
+.nav-link--active {
+  background: var(--color-indigo);
+  border-left-color: var(--color-teal);
+  color: var(--color-teal);
+  font-weight: 600;
+}
+
+.sidebar__user {
+  padding: var(--space-4);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.sidebar__user-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-white);
+}
+
+.sidebar__user-meta {
+  font-size: 12px;
+  color: var(--color-text-on-dark-muted);
+  margin-bottom: var(--space-3);
+  word-break: break-word;
+}
+
+.shell__body {
+  flex: 1;
+  min-width: 0;          /* lets wide tables scroll instead of stretching */
+  display: flex;
+  flex-direction: column;
+}
+
+.shell__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-5);
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.shell__header-title {
+  font-size: 15px;
+  font-weight: 650;
+}
+
+.shell__main {
+  flex: 1;
+  padding: var(--space-5);
+  max-width: 1100px;
+  width: 100%;
+}
+
+.page-header {
+  margin-bottom: var(--space-5);
+}
+
+.page-header .muted {
+  margin: 0;
+}
+
+/* ===========================================================================
+   Cards - the reusable surface, ready for dashboard widgets later
+   =========================================================================== */
+
+.card,
+.panel,
+.app-card,
+.screen-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-5);
+}
+
+.card--elevated {
+  box-shadow: var(--shadow-lg);
+  border-color: transparent;
+}
+
+.panel {
+  margin-top: var(--space-5);
+  padding: var(--space-4) var(--space-5);
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(232px, 1fr));
+  gap: var(--space-4);
+}
+
+.app-card,
+.screen-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  align-items: flex-start;
+  text-align: left;
+  padding: var(--space-4);
+}
+
+.app-card {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  /* A teal bar that grows in on hover, rather than a colour wash. */
+  border-top: 3px solid transparent;
+  transition: border-color 0.12s ease, box-shadow 0.12s ease;
+}
+
+.app-card:hover {
+  border-top-color: var(--color-teal);
+  box-shadow: var(--shadow);
+}
+
+.app-card__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-sm);
+  background: var(--color-neutral-50);
+  border: 1px solid var(--color-border);
+  font-size: 15px;
+  font-weight: 650;
+  color: var(--color-dusk);
+}
+
+.app-card__name {
+  font-weight: 650;
+}
+
+.app-card__description {
+  font-size: 13px;
+  color: var(--color-text-muted);
+}
+
+.screen-card h2 {
+  margin-bottom: 0;
+}
+
+.screen-card code {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  word-break: break-all;
+}
+
+/* ===========================================================================
+   Forms
+   =========================================================================== */
+
+label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  margin-top: var(--space-3);
+  margin-bottom: var(--space-1);
+}
+
+input,
+select,
+textarea {
+  width: 100%;
+  height: 38px;
+  padding: 0 var(--space-3);
+  font: inherit;
+  color: var(--color-text);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+}
+
+select {
+  width: auto;
+  min-width: 150px;
+}
+
+/* A textarea grows with its rows attribute, so it cannot keep the fixed
+   control height, and only vertical dragging is allowed - a user widening one
+   sideways would break the grid it sits in. */
+textarea {
+  height: auto;
+  padding: var(--space-2) var(--space-3);
+  resize: vertical;
+}
+
+/* A read-only field is not disabled: it can still be focused and read out by
+   a screen reader, it simply cannot be typed into. The calculated duration on
+   the leave form is one, so it must look informative rather than broken. */
+input:read-only {
+  background: var(--color-surface-alt);
+  color: var(--color-text-muted);
+  border-style: dashed;
+}
+
+input:hover:not(:disabled):not(:read-only),
+select:hover:not(:disabled),
+textarea:hover:not(:disabled) {
+  border-color: var(--color-dusk);
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--color-teal);
+  box-shadow: var(--focus-ring);
+}
+
+input:disabled,
+select:disabled,
+textarea:disabled {
+  background: var(--color-neutral-50);
+  color: var(--color-text-muted);
+  cursor: not-allowed;
+}
+
+/* ===========================================================================
+   Buttons
+   =========================================================================== */
+
+button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  height: 38px;
+  padding: 0 var(--space-4);
+  font: inherit;
+  font-weight: 600;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  /* Primary: dark text on teal, measured at 8.52:1. */
+  background-color: var(--color-primary);
+  color: var(--color-on-primary);
+  cursor: pointer;
+  transition: background-color 0.12s ease;
+}
+
+button:hover:not(:disabled) {
+  background-color: var(--color-primary-hover);
+}
+
+button:disabled {
+  background-color: var(--color-neutral-100);
+  color: var(--color-text-muted);
+  border-color: var(--color-border);
+  cursor: not-allowed;
+}
+
+.button--block {
+  width: 100%;
+  margin-top: var(--space-5);
+}
+
+.button--small {
+  height: 32px;
+  padding: 0 var(--space-3);
+  font-size: 13px;
+}
+
+/* Secondary: white surface with a dusk-blue label. */
+.button--secondary {
+  background: var(--color-surface);
+  color: var(--color-secondary);
+  border-color: var(--color-border-strong);
+}
+
+.button--secondary:hover:not(:disabled) {
+  background: var(--color-neutral-50);
+  border-color: var(--color-dusk);
+}
+
+/* Ghost, used on the dark sidebar. */
+.button--ghost {
+  background: transparent;
+  color: var(--color-text-on-dark);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.button--ghost:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--color-white);
+}
+
+.button--danger {
+  background: var(--color-error);
+  color: var(--color-white);      /* 6.54:1 */
+}
+
+.button--danger:hover:not(:disabled) {
+  background: var(--color-error-hover);
+}
+
+.link-button {
+  height: auto;
+  padding: 0;
+  background: none;
+  border: none;
+  color: var(--color-secondary);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.link-button:hover:not(:disabled) {
+  background: none;
+  color: var(--color-text);
+  text-decoration: underline;
+}
+
+.row-actions {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+/* ===========================================================================
+   Tables
+   =========================================================================== */
+
+.table-wrap {
+  overflow-x: auto;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.table th,
+.table td {
+  text-align: left;
+  padding: 10px var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+  vertical-align: top;
+}
+
+.table th {
+  font-size: 11px;
+  font-weight: 650;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-text-muted);
+  background: var(--color-surface-alt);
+  white-space: nowrap;
+}
+
+.table tbody tr:hover {
+  background: var(--color-neutral-50);
+}
+
+.table tr:last-child td {
+  border-bottom: none;
+}
+
+/* ===========================================================================
+   Badges
+   =========================================================================== */
+
+.badge-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 2px var(--space-2);
+  margin-right: var(--space-1);
+  border-radius: 999px;
+  background: var(--color-neutral-100);
+  color: var(--color-prussian);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.badge--muted {
+  background: var(--color-neutral-50);
+  color: var(--color-text-muted);
+  border: 1px solid var(--color-border);
+}
+
+/* Teal as a tint behind dark text, never as the text itself. */
+.badge--admin {
+  background: rgba(91, 192, 190, 0.2);
+  color: var(--color-prussian);
+  border: 1px solid var(--color-teal);
+}
+
+.badge__remove {
+  height: auto;
+  padding: 0 2px;
+  background: none;
+  border: none;
+  color: inherit;
+  font-size: 15px;
+  line-height: 1;
+}
+
+.badge__remove:hover:not(:disabled) {
+  background: none;
+  color: var(--color-error);
+}
+
+.badge__remove:disabled {
+  background: none;
+  border: none;
+}
+
+/* ===========================================================================
+   Status: loading / error / empty
+   =========================================================================== */
+
+.status {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  margin: var(--space-3) 0;
+  border-radius: var(--radius);
+  font-size: 14px;
+}
+
+.status--loading {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+}
+
+.status--error {
+  background: var(--color-error-bg);
+  border: 1px solid var(--color-error-border);
+  color: var(--color-error);
+}
+
+.status--error button {
+  margin-left: auto;
+}
+
+.status--empty {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-1);
+  padding: var(--space-6);
+  background: var(--color-surface);
+  border: 1px dashed var(--color-border-strong);
+  color: var(--color-text-muted);
+}
+
+.status--empty strong {
+  color: var(--color-text);
+}
+
+/* Inline form error, e.g. on the login card. */
+.error {
+  margin: var(--space-3) 0 0;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-error-border);
+  border-left: 3px solid var(--color-error);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-error-bg);
+  color: var(--color-error);
+  font-size: 13px;
+}
+
+.spinner {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--color-neutral-300);
+  border-top-color: var(--color-teal);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Respect a reader who has asked for less motion. */
+@media (prefers-reduced-motion: reduce) {
+  .spinner {
+    animation-duration: 3s;
+  }
+
+  .app-card,
+  button {
+    transition: none;
+  }
+}
+
+/* ===========================================================================
+   Definition lists
+   =========================================================================== */
+
+.details {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--space-2) var(--space-4);
+  margin: var(--space-3) 0 0;
+  font-size: 14px;
+}
+
+.details dt {
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.details dd {
+  margin: 0;
+}
+
+/* ===========================================================================
+   Narrower windows - this is a desktop application, but it must not break
+   =========================================================================== */
+
+@media (max-width: 860px) {
+  .shell {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    flex: none;
+    width: 100%;
+  }
+
+  .sidebar__nav {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .nav-link {
+    width: auto;
+    border-left: none;
+    border-bottom: 3px solid transparent;
+  }
+
+  .nav-link--active {
+    border-left: none;
+    border-bottom-color: var(--color-teal);
+  }
+
+  .sidebar__section {
+    display: none;
+  }
+
+  .shell__main {
+    padding: var(--space-4);
+  }
+}
+
+/* ===========================================================================
+   Organisation tree
+   =========================================================================== */
+
+/* Two columns on a wide screen, stacked when narrow. */
+.split {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  gap: var(--space-4);
+  align-items: start;
+}
+
+.panel--flush {
+  margin-top: 0;
+  padding: var(--space-3) var(--space-2);
+}
+
+.split .panel {
+  margin-top: 0;
+}
+
+.tree,
+.tree__children {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.tree__row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  border-radius: var(--radius-sm);
+  border-left: 3px solid transparent;
+}
+
+.tree__row:hover {
+  background: var(--color-neutral-50);
+}
+
+/* The selected node is marked by a teal bar and a tint, never by teal text. */
+.tree__row--selected {
+  background: rgba(91, 192, 190, 0.14);
+  border-left-color: var(--color-teal);
+}
+
+.tree__toggle {
+  height: 22px;
+  width: 22px;
+  padding: 0;
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  font-size: 11px;
+}
+
+.tree__toggle:hover:not(:disabled) {
+  background: var(--color-neutral-100);
+  color: var(--color-text);
+}
+
+.tree__leaf {
+  width: 22px;
+  text-align: center;
+  color: var(--color-border-strong);
+}
+
+.tree__label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex: 1;
+  height: auto;
+  min-height: 30px;
+  padding: var(--space-1) var(--space-2);
+  background: none;
+  border: none;
+  color: var(--color-text);
+  font: inherit;
+  text-align: left;
+}
+
+.tree__label:hover:not(:disabled) {
+  background: none;
+}
+
+.tree__name {
+  font-weight: 500;
+}
+
+.note {
+  margin: var(--space-4) 0 0;
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+}
+
+/* Stack the select above its button when a table cell is cramped. */
+.row-actions--stacked {
+  margin-top: var(--space-2);
+  flex-wrap: wrap;
+}
+
+@media (max-width: 860px) {
+  .split {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ===========================================================================
+   Application shell: screen navigation beside screen content
+   =========================================================================== */
+
+.app-header {
+  margin-bottom: var(--space-4);
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.app-header h1 {
+  margin-top: var(--space-2);
+}
+
+.app-header p {
+  margin: 0;
+}
+
+.app-shell {
+  display: grid;
+  grid-template-columns: 190px minmax(0, 1fr);
+  gap: var(--space-5);
+  align-items: start;
+}
+
+.screen-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  position: sticky;
+  top: var(--space-4);
+}
+
+.screen-nav__link {
+  height: auto;
+  padding: var(--space-2) var(--space-3);
+  border: none;
+  border-left: 3px solid transparent;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text-muted);
+  font-weight: 500;
+  text-align: left;
+  justify-content: flex-start;
+}
+
+.screen-nav__link:hover:not(:disabled) {
+  background: var(--color-neutral-100);
+  color: var(--color-text);
+}
+
+/* Active screen: a teal bar plus a tint. Never teal text on white. */
+.screen-nav__link--active {
+  background: rgba(91, 192, 190, 0.14);
+  border-left-color: var(--color-teal);
+  color: var(--color-text);
+  font-weight: 650;
+}
+
+.app-shell__content {
+  min-width: 0;   /* lets wide charts and tables shrink instead of overflowing */
+}
+
+/* ===========================================================================
+   Dashboards and widgets
+   =========================================================================== */
+
+.dashboard {
+  margin-bottom: var(--space-6);
+}
+
+.dashboard__header {
+  margin-bottom: var(--space-3);
+}
+
+.dashboard__header p {
+  margin: 0;
+}
+
+/* A 12-column grid; each widget says how many columns it spans. */
+.widget-grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+
+.widget {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+  padding: var(--space-4);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+}
+
+.widget__title {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 650;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.widget__stat-value {
+  font-size: 28px;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  color: var(--color-prussian);
+  line-height: 1.2;
+}
+
+/* A compact row of headline figures, for a screen that is not a dashboard.
+   Deliberately NOT the widget grid: those tiles are metadata-driven and come
+   from the dashboard tables, whereas these four belong to one screen and would
+   be dishonest dressed up as configurable. auto-fit keeps them on one row on a
+   wide screen and wraps them on a narrow one without a media query. */
+.summary-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.summary-tile {
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-left: 3px solid var(--color-teal);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+}
+
+.summary-tile__value {
+  font-size: 24px;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  color: var(--color-prussian);
+}
+
+/* A table inside a widget already has the widget's border. */
+.table-wrap--flush {
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+@media (max-width: 860px) {
+  .app-shell {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .screen-nav {
+    position: static;
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .screen-nav__link {
+    border-left: none;
+    border-bottom: 3px solid transparent;
+  }
+
+  .screen-nav__link--active {
+    border-left: none;
+    border-bottom-color: var(--color-teal);
+  }
+
+  /* Every widget takes the full width on a narrow screen. */
+  .widget {
+    grid-column: span 12 !important;
+  }
+}
+
+/* ===========================================================================
+   Workflow: state badges, flow diagram, timeline
+   =========================================================================== */
+
+/* State badges. Colour reinforces the meaning, the label carries it. */
+.badge--state-open {
+  background: rgba(58, 80, 107, 0.12);
+  color: var(--color-dusk);
+  border: 1px solid var(--color-border-strong);
+}
+
+.badge--state-done {
+  background: var(--color-success-bg);
+  color: var(--color-success);
+  border: 1px solid var(--color-success);
+}
+
+.badge--state-rejected {
+  background: var(--color-error-bg);
+  color: var(--color-error);
+  border: 1px solid var(--color-error-border);
+}
+
+.section-heading {
+  margin: var(--space-5) 0 var(--space-2);
+  font-size: 11px;
+  font-weight: 650;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+/* The generated flow diagram. */
+.flow,
+.flow__arrows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.flow__state {
+  padding: var(--space-2) 0;
+  border-left: 2px solid var(--color-border);
+  padding-left: var(--space-3);
+  margin-left: var(--space-2);
+}
+
+.flow__arrows {
+  margin-top: var(--space-2);
+}
+
+.flow__arrow {
+  padding: var(--space-1) 0 var(--space-1) var(--space-3);
+  border-left: 2px solid var(--color-teal);
+  margin-bottom: var(--space-2);
+  font-size: 14px;
+}
+
+.flow__action {
+  font-weight: 650;
+}
+
+.flow__end {
+  padding-top: var(--space-1);
+}
+
+/* The audit trail. */
+.timeline {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.timeline__item {
+  position: relative;
+  padding: 0 0 var(--space-4) var(--space-4);
+  border-left: 2px solid var(--color-border);
+}
+
+.timeline__item:last-child {
+  border-left-color: transparent;
+  padding-bottom: 0;
+}
+
+/* The dot on the line. */
+.timeline__item::before {
+  content: '';
+  position: absolute;
+  left: -5px;
+  top: 5px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-teal);
+}
+
+.timeline__title {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* A one-line create form. */
+.inline-form {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-3);
+  margin-top: 0;
+  margin-bottom: var(--space-4);
+}
+
+.inline-form__field {
+  flex: 1;
+}
+
+.inline-form label {
+  margin-top: 0;
+}
+
+.status--success {
+  background: var(--color-success-bg);
+  border: 1px solid var(--color-success);
+  color: var(--color-success);
+}
+
+.table__row--selected {
+  background: rgba(91, 192, 190, 0.12);
+}
+
+/* ===========================================================================
+   Employee Management: toolbar, pagination, form grid, profile
+   =========================================================================== */
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+.toolbar__search {
+  display: flex;
+  gap: var(--space-2);
+  flex: 1;
+  min-width: 240px;
+}
+
+.toolbar__search input {
+  flex: 1;
+}
+
+/* Push the last control to the right on a wide screen. */
+.toolbar > button:last-child {
+  margin-left: auto;
+}
+
+.pagination {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+}
+
+/* Two columns of fields, collapsing to one when narrow. */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0 var(--space-4);
+}
+
+.form-grid label {
+  margin-top: var(--space-3);
+}
+
+/* A field that needs the full width of the form - a reason or a description,
+   which reads badly in a half-width box. */
+.form-grid__wide {
+  grid-column: 1 / -1;
+}
+
+.profile__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-2);
+}
+
+.profile__header h2 {
+  margin-bottom: 0;
+}
+
+.profile__header p {
+  margin: 0;
+}
+
+@media (max-width: 860px) {
+  .toolbar > button:last-child {
+    margin-left: 0;
+  }
+}
+
+/* ===========================================================================
+   Checkpoint layout fixes
+   =========================================================================== */
+
+/* The sidebar stays put while the content scrolls, and scrolls on its own if
+   the navigation ever grows taller than the window. */
+.sidebar {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+/* The page header stays visible too, so the title and user are always there. */
+.shell__header {
+  position: sticky;
+  top: 0;
+}
+
+/* Long application names wrap in the header instead of pushing the user
+   label off the edge. */
+.shell__header-title {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* Tables with many columns get a sensible minimum, and the wrapper scrolls
+   sideways - the page itself never does. */
+.table {
+  min-width: 560px;
+}
+
+/* Widgets in one row line up: charts share a height, stats share a height, so
+   mixed spans do not produce a ragged grid. */
+.widget {
+  min-height: 120px;
+}
+
+.widget--chart {
+  min-height: 320px;
+}
+
+.widget__stat {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  flex: 1;
+}
+
+/* The ECharts canvas may shrink with its cell - never force the cell wider. */
+.echart {
+  min-width: 0;
+}
+
+/* Two-column layouts stack a little earlier than the phone breakpoint, because
+   a six-column table beside a profile card is cramped well before 860px. */
+@media (max-width: 1100px) {
+  .split {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .app-shell {
+    grid-template-columns: 160px minmax(0, 1fr);
+  }
+}
+
+/* When the sidebar becomes a top bar on narrow windows, sticky no longer
+   makes sense for it. */
+@media (max-width: 860px) {
+  .sidebar {
+    position: static;
+    height: auto;
+    overflow: visible;
+  }
+
+  .shell__header {
+    position: static;
+  }
+
+  .table {
+    min-width: 0;
+  }
+}

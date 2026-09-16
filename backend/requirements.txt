@@ -1,0 +1,16 @@
+# Stage 3 dependencies: web framework + PostgreSQL + password hashing.
+# ETL tooling is added in a later stage.
+
+fastapi==0.118.0            # web framework (pulls in pydantic v2 and starlette)
+uvicorn[standard]==0.37.0   # ASGI server used to run the app locally
+
+sqlalchemy==2.0.44          # ORM: Python classes <-> database tables
+alembic==1.16.5             # database migrations (versioned schema changes)
+psycopg[binary]==3.2.10     # PostgreSQL driver used by SQLAlchemy
+pydantic-settings==2.11.0   # loads settings (e.g. DATABASE_URL) from .env
+
+bcrypt==5.0.0               # password hashing (stage 3 authentication)
+
+# --- development / test only ---
+pytest==8.4.2               # test runner
+httpx==0.28.1               # required by FastAPI's TestClient
